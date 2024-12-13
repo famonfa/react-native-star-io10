@@ -53,9 +53,9 @@ android {
 repositories {
     mavenCentral()
     google()
-
+    
     flatDir {
-        dirs "$rootDir/../node_modules/react-native-star-io10/android/src/lib"
+        dirs "${project.projectDir}/src/lib"
     }
 
     def found = false
@@ -130,7 +130,7 @@ dependencies {
     // noinspection GradleDynamicVersion
     api 'com.facebook.react:react-native:+'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation (name: 'stario10', ext: 'aar')
+    implementation files("${project.projectDir}/src/lib/stario10.aar")
     def coroutines_version = '1.6.4' // Version of the library for Kotlin coroutines (async, await)
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version" // Library for Kotlin coroutines (async, await)
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
