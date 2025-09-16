@@ -57,7 +57,27 @@ repositories {
     google()
 
     flatDir {
-        dirs "$rootDir/../node_modules/react-native-star-io10/android/src/lib"
+        // Multiple fallback paths for different build environments
+        def starIO10Paths = [
+            "$projectDir/src/lib",
+            "$projectDir/libs",
+            "$rootDir/libs",
+            "$rootDir/../node_modules/react-native-star-io10/android/src/lib",
+            "$rootDir/node_modules/react-native-star-io10/android/src/lib",
+            "${project.projectDir}/src/lib"
+        ]
+        
+        // Log the paths for debugging
+        starIO10Paths.each { path ->
+            def dir = new File(path)
+            logger.info("StarIO10: Checking path: $path - exists: ${dir.exists()}")
+            if (dir.exists()) {
+                def aarFile = new File(dir, "stario10.aar")
+                logger.info("StarIO10: AAR file at $path/stario10.aar - exists: ${aarFile.exists()}")
+            }
+        }
+        
+        dirs starIO10Paths
     }
 
     def found = false
@@ -127,6 +147,37 @@ repositories {
 }
 
 def kotlin_version = getExtOrDefault('kotlinVersion')
+
+// Task to ensure AAR is available for cloud builds
+task ensureStarIO10Aar {
+    doLast {
+        def aarSrc = new File(projectDir, "src/lib/stario10.aar")
+        def aarTargets = [
+            new File(projectDir, "libs/stario10.aar"),
+            new File(rootDir, "libs/stario10.aar")
+        ]
+        
+        if (aarSrc.exists()) {
+            aarTargets.each { target ->
+                target.parentFile.mkdirs()
+                if (!target.exists()) {
+                    copy {
+                        from aarSrc
+                        into target.parentFile
+                    }
+                    logger.info("StarIO10: Copied AAR to ${target.absolutePath}")
+                }
+            }
+        } else {
+            logger.warn("StarIO10: Source AAR not found at ${aarSrc.absolutePath}")
+        }
+    }
+}
+
+// Ensure AAR is available before any build tasks
+preBuild.dependsOn ensureStarIO10Aar
+compileDebugKotlin.dependsOn ensureStarIO10Aar
+compileReleaseKotlin.dependsOn ensureStarIO10Aar
 
 dependencies {
     // noinspection GradleDynamicVersion
