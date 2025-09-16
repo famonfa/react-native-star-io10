@@ -176,8 +176,6 @@ task ensureStarIO10Aar {
 
 // Ensure AAR is available before any build tasks
 preBuild.dependsOn ensureStarIO10Aar
-compileDebugKotlin.dependsOn ensureStarIO10Aar
-compileReleaseKotlin.dependsOn ensureStarIO10Aar
 
 dependencies {
     // noinspection GradleDynamicVersion
